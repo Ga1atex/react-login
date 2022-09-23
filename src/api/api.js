@@ -13,6 +13,7 @@ export const authAPI = {
         {
           method: "POST",
           mode: "no-cors",
+          referrerPolicy: "unsafe_url",
           headers: {
             "Content-Type": "application/json",
           },
