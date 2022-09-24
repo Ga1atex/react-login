@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { authAPI } from "../api/api";
+import { maxLengthCreator, required } from "../utils/validators/validators";
+import FormControl from "./common/FormControl";
 import "./LoginForm.css";
 
 const LoginForm = () => {
-  const [userName, setUserName] = useState("");
-  const [password, setPassword] = useState("");
   const [errorFetchMessage, setErrorFetchMessage] = useState({
     isError: false,
     message: "",
@@ -14,79 +14,65 @@ const LoginForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const userName = e.target.userName.value;
+    const password = e.target.password.value;
 
     if (!userName || !password) {
-      setErrorFetchMessage("Заполните все поля!");
+      setErrorFetchMessage({ isError: true, message: "Заполните все поля!" });
       return;
     }
 
     setIsFetching(true);
     try {
-      const response = await authAPI.login({
-        username: userName,
-        password,
-      });
-
-      if (response.status === 401) {
-        setErrorFetchMessage({ isError: true, message: response.detail });
-      } else if (response.status === 403) {
-        setErrorFetchMessage({
-          isError: true,
-          message: "Access is restricted",
-        });
-      } else if (response.status === 500) {
-        setErrorFetchMessage({ isError: true, message: "Server error" });
-      } else {
-        setSuccessMessage("Тут должен быть положительный ответ с сервера");
-        setErrorFetchMessage({ isError: false, message: "" });
-      }
+      const response = await authAPI.login(userName, password);
+      setSuccessMessage("Тут должен быть положительный ответ с сервера");
+      setErrorFetchMessage({ isError: false, message: "" });
+      localStorage.setItem("auth-data", JSON.stringify(response.data?.detail));
     } catch (error) {
-      setErrorFetchMessage(JSON.stringify(error));
+      setErrorFetchMessage({
+        isError: true,
+        message: error.response.data?.detail || error.message,
+      });
     } finally {
       setIsFetching(false);
     }
   };
 
-  const handleUserName = (e) => {
-    setUserName(e.target.value.trim());
-  };
-  const handlePasswordChange = (e) => {
-    setPassword(e.target.value.trim());
-  };
-
   return (
-    <div className="Auth-form-container">
-      <form className="Auth-form" onSubmit={handleSubmit}>
-        <div className="Auth-form-content">
+    <div className="auth-form">
+      <form className="auth-form__container" onSubmit={handleSubmit}>
+        <div className="auth-form__content">
           <div className="form-group">
-            <label htmlFor="userName">Email address</label>
-            <input
+            <label className="form-label" htmlFor="userName">
+              Email address
+            </label>
+            <FormControl
               type="email"
-              className="form-control mt-1"
               placeholder="Enter email"
               name="userName"
-              value={userName}
-              onChange={handleUserName}
+              id="userName"
+              validators={[maxLengthCreator(20), required]}
             />
           </div>
           <div className="form-group mt-3">
-            <label htmlFor="password">Password</label>
-            <input
+            <label className="form-label" htmlFor="password">
+              Password
+            </label>
+            <FormControl
               type="password"
-              className="form-control mt-1"
               placeholder="Enter password"
               name="password"
-              value={password}
-              onChange={handlePasswordChange}
+              id="password"
+              validators={[maxLengthCreator(20), required]}
             />
           </div>
-          {successMessage && (
-            <div class="alert alert-success" role="alert">
+          {!errorFetchMessage.isError && successMessage && (
+            <div className="alert alert-success mt-2" role="alert">
               {successMessage}
             </div>
           )}
           {errorFetchMessage.isError && (
-            <div className="alert alert-danger mt-2">
+            <div className="alert alert-danger mt-2" role="alert">
               {errorFetchMessage.message || "Error has occured!"}
             </div>
           )}

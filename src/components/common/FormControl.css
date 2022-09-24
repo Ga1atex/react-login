@@ -1,0 +1,10 @@
+.error-message {
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 0.875em;
+  color: #dc3545;
+}
+
+.form-control-error {
+  outline: rgb(255, 0, 0) auto 1px;
+}
