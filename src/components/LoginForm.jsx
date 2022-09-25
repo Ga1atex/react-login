@@ -28,7 +28,9 @@ const LoginForm = () => {
       );
       localStorage.setItem("auth-data", JSON.stringify(response));
     } catch (error) {
-      setErrorMessage(error.detail || error.title || "Error has occured!");
+      setErrorMessage(
+        error.detail || error.title || error.message || "Error has occured!"
+      );
     } finally {
       setIsFetching(false);
     }
