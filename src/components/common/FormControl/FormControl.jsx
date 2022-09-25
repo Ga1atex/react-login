@@ -1,5 +1,5 @@
 import React from "react";
-import useInput from "../../utils/hooks/useInput";
+import useInput from "../../../utils/hooks/useInput";
 import "./FormControl.css";
 
 const FormControl = (props) => {

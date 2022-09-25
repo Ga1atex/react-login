@@ -1,15 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { authAPI } from "../api/api";
 import { maxLengthCreator, required } from "../utils/validators/validators";
-import FormControl from "./common/FormControl";
+import Alert from "./common/Alert/Alert";
+import FormControl from "./common/FormControl/FormControl";
 import "./LoginForm.css";
 
 const LoginForm = () => {
-  const [errorFetchMessage, setErrorFetchMessage] = useState({
-    isError: false,
-    message: "",
-  });
-  const [successMessage, setSuccessMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [requestSuccessMessage, setRequestSuccessMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -18,25 +16,28 @@ const LoginForm = () => {
     const password = e.target.password.value;
 
     if (!userName || !password) {
-      setErrorFetchMessage({ isError: true, message: "Заполните все поля!" });
+      setErrorMessage("Заполните все поля!");
       return;
     }
 
     setIsFetching(true);
     try {
       const response = await authAPI.login(userName, password);
-      setSuccessMessage("Тут должен быть положительный ответ с сервера");
-      setErrorFetchMessage({ isError: false, message: "" });
-      localStorage.setItem("auth-data", JSON.stringify(response.data?.detail));
+      setRequestSuccessMessage(
+        response.detail || "Положительный ответ с сервера"
+      );
+      localStorage.setItem("auth-data", JSON.stringify(response));
     } catch (error) {
-      setErrorFetchMessage({
-        isError: true,
-        message: error.response.data?.detail || error.message,
-      });
+      setErrorMessage(error.detail || error.title || "Error has occured!");
     } finally {
       setIsFetching(false);
     }
   };
+
+  useEffect(() => {
+    if (errorMessage) setRequestSuccessMessage("");
+    else if (requestSuccessMessage) setErrorMessage("");
+  }, [errorMessage, requestSuccessMessage]);
 
   return (
     <div className="auth-form">
@@ -66,15 +67,14 @@ const LoginForm = () => {
               validators={[maxLengthCreator(20), required]}
             />
           </div>
-          {!errorFetchMessage.isError && successMessage && (
-            <div className="alert alert-success mt-2" role="alert">
-              {successMessage}
-            </div>
+          {requestSuccessMessage && (
+            <Alert
+              className="alert-success"
+              message={requestSuccessMessage}
+            ></Alert>
           )}
-          {errorFetchMessage.isError && (
-            <div className="alert alert-danger mt-2" role="alert">
-              {errorFetchMessage.message || "Error has occured!"}
-            </div>
+          {errorMessage && (
+            <Alert className="alert-danger" message={errorMessage}></Alert>
           )}
 
           <div className="d-grid gap-2 mt-3">
