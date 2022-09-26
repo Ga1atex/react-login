@@ -7,7 +7,7 @@ import "./LoginForm.css";
 
 const LoginForm = () => {
   const [errorMessage, setErrorMessage] = useState("");
-  const [requestSuccessMessage, setRequestSuccessMessage] = useState("dsadsa");
+  const [requestSuccessMessage, setRequestSuccessMessage] = useState("");
   const [isFetching, setIsFetching] = useState(false);
 
   const handleSubmit = async (e) => {
